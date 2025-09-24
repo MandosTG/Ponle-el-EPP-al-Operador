@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ponle el EPP al Operador</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .game-header {
+            text-align: center;
+            margin-bottom: 15px;
+            color: white;
+        }
+        
+        .game-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .game-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .game-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 1400px;
+            width: 100%;
+            height: calc(100vh - 140px);
+            min-height: 500px;
+        }
+        
+        .operator-section {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .operator-main {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        
+        .scenario-selector-left {
+            min-width: 180px;
+        }
+        
+        .scenario-buttons-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .scenario-btn-vertical {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            background: #e3f2fd;
+            color: #1976d2;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: left;
+            width: 100%;
+        }
+        
+        .scenario-btn-vertical:hover {
+            background: #1976d2;
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .scenario-btn-vertical.active {
+            background: #1976d2;
+            color: white;
+        }
+        
+        .operator-container {
+            position: relative;
+            width: 250px;
+            height: 320px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 3px dashed #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+        }
+        
+        .operator-base {
+            width: 120px;
+            height: 280px;
+            position: relative;
+        }
+        
+        .operator-head {
+            width: 60px;
+            height: 60px;
+            background: #fdbcb4;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            position: relative;
+        }
+        
+        .operator-body {
+            width: 80px;
+            height: 120px;
+            background: #4a90e2;
+            margin: 0 auto 10px;
+            border-radius: 10px;
+        }
+        
+        .operator-legs {
+            width: 60px;
+            height: 80px;
+            background: #2c3e50;
+            margin: 0 auto;
+            border-radius: 0 0 10px 10px;
+        }
+        
+        .epp-item {
+            position: absolute;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .epp-item.placed {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .helmet {
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 50px;
+            background: #ff6b35;
+            border-radius: 50% 50% 20% 20%;
+            border: 3px solid #e55a2b;
+        }
+        
+        .safety-glasses {
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 15px;
+            background: #333;
+            border-radius: 25px;
+        }
+        
+        .ear-protection {
+            top: 10px;
+            left: -10px;
+            width: 20px;
+            height: 30px;
+            background: #ff9500;
+            border-radius: 50%;
+        }
+        
+        .ear-protection.right {
+            left: auto;
+            right: -10px;
+        }
+        
+        .gloves {
+            top: 80px;
+            left: -15px;
+            width: 25px;
+            height: 40px;
+            background: #4caf50;
+            border-radius: 15px;
+        }
+        
+        .gloves.right {
+            left: auto;
+            right: -15px;
+        }
+        
+        .safety-vest {
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff6f00 0%, #ffb300 50%, #ff6f00 100%);
+            border-radius: 10px;
+            border: 2px solid #e65100;
+            opacity: 0.95;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .safety-vest::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            height: 12px;
+            background: linear-gradient(90deg, #4fc3f7 0%, #29b6f6 50%, #4fc3f7 100%);
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .safety-vest::after {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            right: 8px;
+            height: 12px;
+            background: linear-gradient(90deg, #4fc3f7 0%, #29b6f6 50%, #4fc3f7 100%);
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .operator-body.vest-highlight {
+            animation: vestHighlight 2s ease-in-out;
+            box-shadow: 0 0 20px rgba(255, 111, 0, 0.6);
+        }
+        
+        @keyframes vestHighlight {
+            0% { 
+                background: #4a90e2; 
+                box-shadow: none;
+            }
+            25% { 
+                background: #2c5282; 
+                box-shadow: 0 0 15px rgba(255, 111, 0, 0.4);
+            }
+            50% { 
+                background: #4a90e2; 
+                box-shadow: 0 0 20px rgba(255, 111, 0, 0.6);
+            }
+            75% { 
+                background: #2c5282; 
+                box-shadow: 0 0 15px rgba(255, 111, 0, 0.4);
+            }
+            100% { 
+                background: #4a90e2; 
+                box-shadow: none;
+            }
+        }
+        
+        .boots {
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 25px;
+            background: #8d6e63;
+            border-radius: 10px;
+        }
+        
+        .epp-selection {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .scenario-selector {
+            margin-bottom: 30px;
+        }
+        
+        .scenario-selector h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .scenario-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .scenario-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            background: #e3f2fd;
+            color: #1976d2;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .scenario-btn:hover {
+            background: #1976d2;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .scenario-btn.active {
+            background: #1976d2;
+            color: white;
+        }
+        
+        .epp-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .epp-card {
+            background: #f8f9fa;
+            border: 3px solid #dee2e6;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        
+        .epp-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .epp-card.selected {
+            border-color: #4caf50;
+            background: #e8f5e8;
+        }
+        
+        .epp-card.correct {
+            border-color: #4caf50;
+            background: #e8f5e8;
+            animation: correctPulse 0.6s ease;
+        }
+        
+        .epp-card.incorrect {
+            border-color: #f44336;
+            background: #ffebee;
+            animation: incorrectShake 0.6s ease;
+        }
+        
+        .epp-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .epp-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+        
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #f57c00;
+            transform: translateY(-2px);
+        }
+        
+        .score-board {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .score {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .feedback.show {
+            opacity: 1;
+        }
+        
+        .feedback.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+        }
+        
+        .feedback.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 2px solid #f44336;
+        }
+        
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        @media (max-width: 1024px) {
+            .game-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                gap: 20px;
+            }
+            
+            .operator-container {
+                width: 250px;
+                height: 350px;
+            }
+            
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .epp-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">🦺 Ponle el EPP al Operador</h1>
+        <p class="game-subtitle">Aprende sobre seguridad industrial de manera divertida</p>
+    </div>
+    
+    <div class="score-board">
+        <div class="score">Puntuación: <span id="score">0</span> / 100 puntos</div>
+    </div>
+    
+    <div class="game-container">
+        <div class="operator-section">
+            <h3 style="color: #333; margin-bottom: 15px; font-size: 1.2rem;">Operador en la Planta</h3>
+            <div class="operator-main">
+                <div class="scenario-selector-left">
+                    <h4 style="color: #333; margin-bottom: 15px; font-size: 1.1rem;">Escenarios:</h4>
+                    <div class="scenario-buttons-vertical">
+                        <button class="scenario-btn-vertical" data-scenario="processing">Área de Procesamiento</button>
+                        <button class="scenario-btn-vertical" data-scenario="warehouse">Almacén</button>
+                        <button class="scenario-btn-vertical" data-scenario="cleaning">Limpieza y Sanitización</button>
+                        <button class="scenario-btn-vertical" data-scenario="maintenance">Mantenimiento</button>
+                    </div>
+                </div>
+                <div class="operator-container">
+                    <div class="operator-base">
+                        <div class="operator-head">
+                            <div class="epp-item helmet"></div>
+                            <div class="epp-item safety-glasses"></div>
+                            <div class="epp-item ear-protection"></div>
+                            <div class="epp-item ear-protection right"></div>
+                        </div>
+                        <div class="operator-body">
+                            <div class="epp-item gloves"></div>
+                            <div class="epp-item gloves right"></div>
+                            <div class="epp-item safety-vest"></div>
+                        </div>
+                        <div class="operator-legs">
+                            <div class="epp-item boots"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="scenario-description" style="background: #e3f2fd; padding: 12px; border-radius: 10px; color: #1976d2; font-weight: 600; margin-top: 15px; font-size: 0.9rem;">
+                Selecciona un escenario para comenzar
+            </div>
+        </div>
+        
+        <div class="epp-selection">
+            <h3 style="color: #333; margin-bottom: 15px; font-size: 1.2rem;">Selecciona el EPP Necesario</h3>
+            <div class="epp-grid">
+                <div class="epp-card" data-epp="helmet">
+                    <span class="epp-icon">⛑️</span>
+                    <div class="epp-name">Casco de Seguridad</div>
+                </div>
+                <div class="epp-card" data-epp="safety-glasses">
+                    <span class="epp-icon">🥽</span>
+                    <div class="epp-name">Gafas de Seguridad</div>
+                </div>
+                <div class="epp-card" data-epp="ear-protection">
+                    <span class="epp-icon">🎧</span>
+                    <div class="epp-name">Protección Auditiva</div>
+                </div>
+                <div class="epp-card" data-epp="gloves">
+                    <span class="epp-icon">🧤</span>
+                    <div class="epp-name">Guantes</div>
+                </div>
+                <div class="epp-card" data-epp="safety-vest">
+                    <span class="epp-icon">🦺</span>
+                    <div class="epp-name">Chaleco Reflectivo</div>
+                </div>
+                <div class="epp-card" data-epp="boots">
+                    <span class="epp-icon">🥾</span>
+                    <div class="epp-name">Botas de Seguridad</div>
+                </div>
+            </div>
+            
+            <div class="game-controls">
+                <button class="btn btn-primary" id="check-answer">Verificar Respuesta</button>
+                <button class="btn btn-secondary" id="next-scenario">Siguiente Escenario</button>
+            </div>
+            
+            <div class="feedback" id="feedback"></div>
+        </div>
+    </div>
+
+    <script>
+        class EPPGame {
+            constructor() {
+                this.score = 0;
+                this.currentScenario = null;
+                this.selectedEPP = new Set();
+                this.placedEPP = new Set();
+                this.scenarioResults = {};
+                
+                this.scenarios = {
+                    processing: {
+                        name: "Área de Procesamiento",
+                        description: "Trabajando cerca de maquinaria de procesamiento de alimentos con ruido alto y riesgo de salpicaduras",
+                        requiredEPP: ["helmet", "safety-glasses", "ear-protection", "gloves", "boots"],
+                        explanation: "En el área de procesamiento necesitas: casco (objetos que caen), gafas (salpicaduras), protección auditiva (ruido de máquinas), guantes (manipulación) y botas antideslizantes."
+                    },
+                    warehouse: {
+                        name: "Almacén",
+                        description: "Moviendo cajas y productos en el almacén con montacargas operando",
+                        requiredEPP: ["helmet", "safety-vest", "boots"],
+                        explanation: "En el almacén necesitas: casco (caída de objetos), chaleco reflectivo (visibilidad con montacargas) y botas de seguridad (protección de pies)."
+                    },
+                    cleaning: {
+                        name: "Limpieza y Sanitización",
+                        description: "Usando químicos de limpieza y desinfectantes en áreas húmedas",
+                        requiredEPP: ["safety-glasses", "gloves", "boots"],
+                        explanation: "Para limpieza necesitas: gafas (protección contra químicos), guantes resistentes a químicos y botas antideslizantes para suelos húmedos."
+                    },
+                    maintenance: {
+                        name: "Mantenimiento",
+                        description: "Reparando equipos con herramientas eléctricas y soldadura",
+                        requiredEPP: ["helmet", "safety-glasses", "ear-protection", "gloves", "boots"],
+                        explanation: "En mantenimiento necesitas todo el EPP: casco, gafas, protección auditiva, guantes especializados y botas de seguridad."
+                    }
+                };
+                
+                this.init();
+            }
+            
+            init() {
+                this.bindEvents();
+                this.updateScore();
+            }
+            
+            bindEvents() {
+                // Scenario selection
+                document.querySelectorAll('.scenario-btn-vertical').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.selectScenario(e.target.dataset.scenario);
+                    });
+                });
+                
+                // EPP selection
+                document.querySelectorAll('.epp-card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        this.toggleEPP(e.currentTarget.dataset.epp, e.currentTarget);
+                    });
+                });
+                
+                // Game controls
+                document.getElementById('check-answer').addEventListener('click', () => {
+                    this.checkAnswer();
+                });
+                
+                document.getElementById('next-scenario').addEventListener('click', () => {
+                    this.nextScenario();
+                });
+            }
+            
+            selectScenario(scenarioKey) {
+                this.currentScenario = scenarioKey;
+                this.selectedEPP.clear();
+                this.placedEPP.clear();
+                
+                // Update UI
+                document.querySelectorAll('.scenario-btn-vertical').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-scenario="${scenarioKey}"]`).classList.add('active');
+                
+                document.getElementById('scenario-description').textContent = 
+                    this.scenarios[scenarioKey].description;
+                
+                // Reset EPP cards
+                document.querySelectorAll('.epp-card').forEach(card => {
+                    card.classList.remove('selected', 'correct', 'incorrect');
+                });
+                
+                // Reset operator EPP
+                document.querySelectorAll('.epp-item').forEach(item => {
+                    item.classList.remove('placed');
+                });
+                
+                this.hideFeedback();
+            }
+            
+            toggleEPP(eppType, cardElement) {
+                if (!this.currentScenario) {
+                    this.showFeedback('Primero selecciona un escenario de trabajo', 'error');
+                    return;
+                }
+                
+                if (this.selectedEPP.has(eppType)) {
+                    this.selectedEPP.delete(eppType);
+                    cardElement.classList.remove('selected');
+                    this.removeEPPFromOperator(eppType);
+                } else {
+                    this.selectedEPP.add(eppType);
+                    cardElement.classList.add('selected');
+                    this.addEPPToOperator(eppType);
+                }
+                
+                // Immediate visual feedback
+                this.hideFeedback();
+            }
+            
+            addEPPToOperator(eppType) {
+                const eppElements = document.querySelectorAll(`.${eppType}`);
+                eppElements.forEach(element => {
+                    element.classList.add('placed');
+                });
+                this.placedEPP.add(eppType);
+                
+                // Special effect for safety vest
+                if (eppType === 'safety-vest') {
+                    this.showVestBeforeAfter();
+                }
+            }
+            
+            removeEPPFromOperator(eppType) {
+                const eppElements = document.querySelectorAll(`.${eppType}`);
+                eppElements.forEach(element => {
+                    element.classList.remove('placed');
+                });
+                this.placedEPP.delete(eppType);
+            }
+            
+            checkAnswer() {
+                if (!this.currentScenario) {
+                    this.showFeedback('Primero selecciona un escenario de trabajo', 'error');
+                    return;
+                }
+                
+                const scenario = this.scenarios[this.currentScenario];
+                const requiredEPP = new Set(scenario.requiredEPP);
+                const selectedArray = Array.from(this.selectedEPP);
+                
+                // Calculate correct selections
+                let correctSelections = 0;
+                selectedArray.forEach(epp => {
+                    if (requiredEPP.has(epp)) {
+                        correctSelections++;
+                    }
+                });
+                
+                // Calculate points for this scenario (10 points per correct EPP)
+                const scenarioPoints = correctSelections * 10;
+                
+                // Only update score if this scenario hasn't been completed before or if score improved
+                if (!this.scenarioResults[this.currentScenario] || scenarioPoints > this.scenarioResults[this.currentScenario]) {
+                    const previousPoints = this.scenarioResults[this.currentScenario] || 0;
+                    this.score = this.score - previousPoints + scenarioPoints;
+                    this.scenarioResults[this.currentScenario] = scenarioPoints;
+                }
+                
+                // Update card visuals
+                document.querySelectorAll('.epp-card').forEach(card => {
+                    const eppType = card.dataset.epp;
+                    card.classList.remove('correct', 'incorrect');
+                    
+                    if (requiredEPP.has(eppType)) {
+                        card.classList.add('correct');
+                    } else if (this.selectedEPP.has(eppType)) {
+                        card.classList.add('incorrect');
+                    }
+                });
+                
+                // Check if all EPP are correct
+                const isCompletelyCorrect = selectedArray.length === requiredEPP.size && 
+                                          selectedArray.every(epp => requiredEPP.has(epp));
+                
+                let feedbackMessage = '';
+                if (isCompletelyCorrect) {
+                    feedbackMessage = `¡Perfecto! +${scenarioPoints} puntos. ${scenario.explanation}`;
+                } else if (correctSelections > 0) {
+                    feedbackMessage = `Parcialmente correcto. +${scenarioPoints} puntos de ${requiredEPP.size * 10} posibles. ${scenario.explanation}`;
+                } else {
+                    feedbackMessage = `Incorrecto. ${scenario.explanation}`;
+                }
+                
+                this.showFeedback(feedbackMessage, correctSelections > 0 ? 'success' : 'error');
+                this.updateScore();
+                this.checkAchievements();
+            }
+            
+            nextScenario() {
+                const scenarios = Object.keys(this.scenarios);
+                const currentIndex = scenarios.indexOf(this.currentScenario);
+                const nextIndex = (currentIndex + 1) % scenarios.length;
+                
+                this.selectScenario(scenarios[nextIndex]);
+            }
+            
+            checkAchievements() {
+                let achievementMessage = '';
+                
+                if (this.score >= 100) {
+                    achievementMessage = '🏆 ¡Genial, debes compartir tu conocimiento con el equipo!';
+                } else if (this.score >= 90) {
+                    achievementMessage = '🌟 ¡Excelente, si sabes de seguridad en el trabajo!';
+                } else if (this.score >= 70) {
+                    achievementMessage = '👍 ¡Muy bien, tienes conocimiento!';
+                }
+                
+                if (achievementMessage) {
+                    setTimeout(() => {
+                        this.showAchievement(achievementMessage);
+                    }, 1500);
+                }
+            }
+            
+            showAchievement(message) {
+                const achievement = document.createElement('div');
+                achievement.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: linear-gradient(135deg, #4caf50, #45a049);
+                    color: white;
+                    padding: 30px 40px;
+                    border-radius: 20px;
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    text-align: center;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                    z-index: 1000;
+                    animation: achievementPop 3s ease forwards;
+                `;
+                achievement.textContent = message;
+                
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes achievementPop {
+                        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+                        20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+                        30% { transform: translate(-50%, -50%) scale(1); }
+                        70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                        100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                    }
+                `;
+                
+                document.head.appendChild(style);
+                document.body.appendChild(achievement);
+                
+                setTimeout(() => {
+                    document.body.removeChild(achievement);
+                    document.head.removeChild(style);
+                }, 3000);
+            }
+            
+            showFeedback(message, type) {
+                const feedback = document.getElementById('feedback');
+                feedback.textContent = message;
+                feedback.className = `feedback show ${type}`;
+            }
+            
+            hideFeedback() {
+                const feedback = document.getElementById('feedback');
+                feedback.classList.remove('show');
+            }
+            
+            updateScore() {
+                document.getElementById('score').textContent = this.score;
+            }
+            
+            showVestBeforeAfter() {
+                const operatorBody = document.querySelector('.operator-body');
+                const vestElement = document.querySelector('.safety-vest');
+                
+                // Show "before" state briefly
+                vestElement.style.opacity = '0';
+                operatorBody.classList.add('vest-highlight');
+                
+                // Create temporary message
+                const message = document.createElement('div');
+                message.style.cssText = `
+                    position: absolute;
+                    top: -30px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(255, 111, 0, 0.9);
+                    color: white;
+                    padding: 8px 15px;
+                    border-radius: 20px;
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    white-space: nowrap;
+                    z-index: 100;
+                    animation: fadeInOut 3s ease forwards;
+                `;
+                message.textContent = '¡Ahora eres más visible y seguro!';
+                
+                const operatorContainer = document.querySelector('.operator-container');
+                operatorContainer.appendChild(message);
+                
+                // Show "after" state with vest
+                setTimeout(() => {
+                    vestElement.style.opacity = '0.95';
+                    vestElement.style.animation = 'vestAppear 1s ease forwards';
+                }, 1000);
+                
+                // Clean up
+                setTimeout(() => {
+                    operatorBody.classList.remove('vest-highlight');
+                    if (message.parentNode) {
+                        message.parentNode.removeChild(message);
+                    }
+                    vestElement.style.animation = '';
+                }, 3000);
+                
+                // Add vest appear animation if not exists
+                if (!document.querySelector('#vest-animation-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'vest-animation-style';
+                    style.textContent = `
+                        @keyframes fadeInOut {
+                            0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+                            20% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                            80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+                        }
+                        @keyframes vestAppear {
+                            0% { opacity: 0; transform: translateX(-50%) scale(0.8); }
+                            50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+                            100% { opacity: 0.95; transform: translateX(-50%) scale(1); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+        }
+        
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new EPPGame();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98440c05a126a915',t:'MTc1ODczNTQxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
