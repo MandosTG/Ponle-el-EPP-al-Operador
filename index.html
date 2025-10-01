@@ -433,6 +433,50 @@
             font-weight: 600;
         }
         
+        .counters-board {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .counter-item {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .counter-item:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
+        }
+        
+        .counter-icon {
+            font-size: 1.5rem;
+        }
+        
+        .counter-info {
+            text-align: left;
+        }
+        
+        .counter-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            margin-bottom: 2px;
+        }
+        
+        .counter-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        
         .feedback {
             margin-top: 15px;
             padding: 12px;
@@ -490,6 +534,17 @@
             .epp-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+            
+            .counters-board {
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+            }
+            
+            .counter-item {
+                width: 200px;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -501,6 +556,23 @@
     
     <div class="score-board">
         <div class="score">Puntuación: <span id="score">0</span> / 100 puntos</div>
+    </div>
+    
+    <div class="counters-board">
+        <div class="counter-item">
+            <div class="counter-icon">👥</div>
+            <div class="counter-info">
+                <div class="counter-label">Participantes</div>
+                <div class="counter-value" id="participants-count">0</div>
+            </div>
+        </div>
+        <div class="counter-item">
+            <div class="counter-icon">🏆</div>
+            <div class="counter-info">
+                <div class="counter-label">Expertos (100+ pts)</div>
+                <div class="counter-value" id="experts-count">0</div>
+            </div>
+        </div>
     </div>
     
     <div class="game-container">
@@ -586,6 +658,11 @@
                 this.selectedEPP = new Set();
                 this.placedEPP = new Set();
                 this.scenarioResults = {};
+                this.hasStartedGame = false;
+                
+                // Load counters from localStorage
+                this.participantsCount = parseInt(localStorage.getItem('epp-participants') || '0');
+                this.expertsCount = parseInt(localStorage.getItem('epp-experts') || '0');
                 
                 this.scenarios = {
                     processing: {
@@ -620,6 +697,7 @@
             init() {
                 this.bindEvents();
                 this.updateScore();
+                this.updateCounters();
             }
             
             bindEvents() {
@@ -648,6 +726,14 @@
             }
             
             selectScenario(scenarioKey) {
+                // Count as participant when they start playing for the first time
+                if (!this.hasStartedGame) {
+                    this.hasStartedGame = true;
+                    this.participantsCount++;
+                    this.saveCounters();
+                    this.updateCounters();
+                }
+                
                 this.currentScenario = scenarioKey;
                 this.selectedEPP.clear();
                 this.placedEPP.clear();
@@ -784,6 +870,19 @@
             checkAchievements() {
                 let achievementMessage = '';
                 
+                // Check if player reached expert level (100+ points) for the first time
+                const previousBestScore = parseInt(localStorage.getItem('epp-best-score') || '0');
+                if (this.score >= 100 && previousBestScore < 100) {
+                    this.expertsCount++;
+                    this.saveCounters();
+                    this.updateCounters();
+                }
+                
+                // Save best score
+                if (this.score > previousBestScore) {
+                    localStorage.setItem('epp-best-score', this.score.toString());
+                }
+                
                 if (this.score >= 100) {
                     achievementMessage = '🏆 ¡Genial, debes compartir tu conocimiento con el equipo!';
                 } else if (this.score >= 90) {
@@ -852,6 +951,16 @@
             
             updateScore() {
                 document.getElementById('score').textContent = this.score;
+            }
+            
+            updateCounters() {
+                document.getElementById('participants-count').textContent = this.participantsCount;
+                document.getElementById('experts-count').textContent = this.expertsCount;
+            }
+            
+            saveCounters() {
+                localStorage.setItem('epp-participants', this.participantsCount.toString());
+                localStorage.setItem('epp-experts', this.expertsCount.toString());
             }
             
             showVestBeforeAfter() {
@@ -926,5 +1035,5 @@
             new EPPGame();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98440c05a126a915',t:'MTc1ODczNTQxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'987c960655c12e2a',t:'MTc1OTMyODI3Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
